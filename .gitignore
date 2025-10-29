@@ -12,12 +12,11 @@ __pycache__/
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
 
-# Data
-data/raw/
-data/clean/
 # Generated reports
 reports/*.html
 reports/*.png
+
+# Datasets
 data/raw/**
 data/clean/**
 !data/**/.gitkeep
