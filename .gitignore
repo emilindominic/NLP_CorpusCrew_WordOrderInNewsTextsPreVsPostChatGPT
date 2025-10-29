@@ -18,3 +18,6 @@ data/clean/
 # Generated reports
 reports/*.html
 reports/*.png
+data/raw/**
+data/clean/**
+!data/**/.gitkeep
