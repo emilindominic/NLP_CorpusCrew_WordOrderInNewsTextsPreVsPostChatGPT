@@ -1,0 +1,45 @@
+project:
+  cutoff_date: "2022-11-30"  # date separating pre/post ChatGPT
+  min_tokens: 8              # drop too-short sentences (like headlines)
+  deduplicate: true          # remove exact duplicates
+  output_combined: true      # also save one merged TSV across all languages
+
+languages:
+  - code: eng
+    name: English
+    raw_dir: data/raw/english
+    corpora:
+      - eng_news_2018
+      - eng_news_2019
+      - eng_news_2020
+      - eng_news_2023
+      - eng_news_2024
+
+  - code: deu
+    name: German
+    raw_dir: data/raw/german
+    corpora:
+      - deu_news_2019
+      - deu_news_2020
+      - deu_news_2021
+      - deu_news_2022
+      - deu_news_2023
+      - deu_news_2024
+    special_rules:
+      split_2022_by_month: true  # Jan–Nov = Pre, Dec = Post
+
+  - code: rus
+    name: Russian
+    raw_dir: data/raw/russian
+    corpora:
+      - rus_news_2019
+      - rus_news_2020
+      - rus_news_2021
+      - rus_news_2022
+      - rus_news_2023
+      - rus_news_2024
+
+paths:
+  raw_root: data/raw
+  clean_root: data/clean
+  reports_root: reports
