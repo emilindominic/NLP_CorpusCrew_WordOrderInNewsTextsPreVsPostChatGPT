@@ -6,7 +6,7 @@
 ---
 
 ## Team Information
-Corpus Crew (group 100)
+Corpus Crew (group 10)
 
 | Name             | Stud. ID |
 |------------------|----------|
@@ -16,6 +16,8 @@ Corpus Crew (group 100)
 | Tahseen          | <id>     |
 
 ---
+
+**Please open README.md and read in "Code" mode, because some parts are not viewed as they should.**
 
 ## Project Overview
 Our project investigates **word order patterns in online news articles** before and after the public release of ChatGPT (Nov 2022).  
