@@ -12,7 +12,7 @@ Corpus Crew (group 10)
 |------------------|----------|
 | Assylbek Tleules | 12432843 |
 | Emily Jacob      | 12143768 |
-| Luka             | <id>     |
+| Luka             | 12332270 |
 | Tahseen          | <id>     |
 
 ---
