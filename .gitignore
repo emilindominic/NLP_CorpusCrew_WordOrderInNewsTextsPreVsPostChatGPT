@@ -20,4 +20,3 @@ reports/*.png
 
 # Datasets
 data/conllu/
-TextPreprocessing.ipynb
