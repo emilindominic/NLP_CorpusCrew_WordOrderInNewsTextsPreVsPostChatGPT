@@ -17,6 +17,3 @@ notebooks/.ipynb_checkpoints/
 # Generated reports
 reports/*.html
 reports/*.png
-
-# Datasets
-data/conllu/
