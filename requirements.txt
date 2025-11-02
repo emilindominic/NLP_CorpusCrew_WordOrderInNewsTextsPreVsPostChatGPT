@@ -5,3 +5,5 @@ PyYAML>=6.0
 tabulate>=0.9
 pytz>=2023.3
 tzdata>=2023.3
+stanza>=1.7.0
+tqdm>=4.66.0
