@@ -7,6 +7,8 @@ __pycache__/
 
 # OS
 .DS_Store
+data/**/.DS_Store
+.idea/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -17,6 +19,4 @@ reports/*.html
 reports/*.png
 
 # Datasets
-data/raw/**
-data/clean/**
-!data/**/.gitkeep
+data/conllu/
