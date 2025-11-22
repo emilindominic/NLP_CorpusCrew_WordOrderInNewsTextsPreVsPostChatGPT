@@ -22,7 +22,7 @@ def read_conllu_file(filepath, max_sentences=None):
         for line in f:
             line = line.strip()
 
-            # metadata lines (year, period, etc.)
+            # metadata lines (year, period)
             if line.startswith('# '):
                 key_val = line[2:].split(' = ')
                 if len(key_val) == 2:
@@ -38,15 +38,15 @@ def read_conllu_file(filepath, max_sentences=None):
                     current_sentence = []
                     metadata = {}
 
-                    # stop if we hit the limit (for testing)
+                    # stop if we hit the limit
                     if max_sentences and len(sentences) >= max_sentences:
                         break
 
-            # token line (actual word data)
+            # token line
             elif not line.startswith('#'):
                 parts = line.split('\t')
                 if len(parts) >= 10:
-                    # skip multi-word tokens (like "15-16")
+                    # skip multi-word tokens (like 15-16)
                     if '-' in parts[0]:
                         continue
 
@@ -73,14 +73,14 @@ def extract_svo(sentence_tokens):
     Only extracts S and O that directly connect to the root verb (main clause).
     This prevents mixing elements from different clauses.
     """
-    # Step 1: Find the root verb (main clause verb)
+    # S1: Find the root verb
     verb = None
     for token in sentence_tokens:
         if token['deprel'] == 'root' and token['upos'] in ['VERB', 'AUX']:
             verb = token
             break
 
-    # if no root verb found, can't determine anything
+    # if no root verb found, cant determine anything
     if not verb:
         return {
             'subject': None,
@@ -91,17 +91,17 @@ def extract_svo(sentence_tokens):
             'has_object': False
         }
 
-    # Step 2: Find subject and object that point TO this root verb
-    # This ensures we only get elements from the main clause
+    # S2: Find subject and object that point to this root verb
+    # this ensures we only get elements from the main clause
     subject = None
     obj = None
 
     for token in sentence_tokens:
-        # Subject must point to the root verb (head = verb's id)
+        # Subject must point to the root verb
         if token['deprel'] in ['nsubj', 'nsubj:pass'] and token['head'] == verb['id']:
             subject = token
 
-        # Object must point to the root verb (head = verb's id)
+        # Object must point to the root verb
         elif token['deprel'] == 'obj' and token['head'] == verb['id']:
             obj = token
 
@@ -124,9 +124,9 @@ def determine_word_order(svo_dict):
     v = svo_dict['verb']
     o = svo_dict['object']
 
-    # if any core element is missing, can't determine full order
+    # if any core element is missing, cant determine full order
     if not (s and v and o):
-        # partial orders (might be useful later)
+        # partial orders
         if s and v:
             return 'SV_only'
         elif v and o:
@@ -141,7 +141,7 @@ def determine_word_order(svo_dict):
     v_pos = v['id']
     o_pos = o['id']
 
-    # all 6 possible orders
+    # 6 possible orders
     if s_pos < v_pos < o_pos:
         return 'SVO'
     elif s_pos < o_pos < v_pos:
@@ -155,7 +155,6 @@ def determine_word_order(svo_dict):
     elif o_pos < v_pos < s_pos:
         return 'OVS'
     else:
-        # shouldn't happen but just in case
         return 'UNCLEAR'
 
 
@@ -171,13 +170,8 @@ def process_conllu_file(filepath, max_sentences=None):
         tokens = sent_data['tokens']
         metadata = sent_data['metadata']
 
-        # extract S, V, O
         svo = extract_svo(tokens)
-
-        # determine word order
         word_order = determine_word_order(svo)
-
-        # get sentence text
         sentence_text = ' '.join(t['text'] for t in tokens)
 
         # compile result
@@ -221,7 +215,6 @@ def main():
 
     input_path = Path(args.input)
 
-    # collect all conllu files
     if input_path.is_file():
         conllu_files = [input_path]
     else:
@@ -234,7 +227,6 @@ def main():
     for filepath in conllu_files:
         print(f"\nProcessing: {filepath.name}")
 
-        # extract language from filename (e.g., "eng_news_2019_10K.conllu")
         parts = filepath.stem.split('_')
         language = parts[0]
 
@@ -246,7 +238,7 @@ def main():
 
         all_results.extend(results)
 
-        print(f"  Extracted {len(results)} sentences")
+        print(f"Extracted {len(results)} sentences")
 
         # show distribution for this file
         if results:
@@ -254,16 +246,15 @@ def main():
             for r in results:
                 order_counts[r['word_order']] += 1
 
-            print(f"  Word order distribution:")
+            print(f"Word order distribution:")
             for order, count in sorted(order_counts.items(), key=lambda x: -x[1]):
                 pct = 100 * count / len(results)
-                print(f"    {order}: {count} ({pct:.1f}%)")
+                print(f"{order}: {count} ({pct:.1f}%)")
 
     # save to CSV
     if all_results:
         df = pd.DataFrame(all_results)
 
-        # reorder columns for readability
         cols = ['sent_id', 'language', 'year', 'period', 'date', 'word_order',
                 'sentence', 'has_subject', 'has_verb', 'has_object']
 
@@ -296,7 +287,7 @@ def main():
             lang_df = df[df['language'] == lang]
             svo_count = len(lang_df[lang_df['word_order'] == 'SVO'])
             pct = 100 * svo_count / len(lang_df)
-            print(f"  {lang}: {len(lang_df)} sentences, {svo_count} SVO ({pct:.1f}%)")
+            print(f"{lang}: {len(lang_df)} sentences, {svo_count} SVO ({pct:.1f}%)")
 
     else:
         print("No results to save!")

@@ -30,20 +30,7 @@ def split_data(
     random_seed: int = 42,
     stratify_by_language: bool = True
 ):
-    """
-    Split dataset into train/validation/test sets.
-
-    Args:
-        input_csv: Path to input CSV with word order labels
-        train_output: Path to save training set
-        val_output: Path to save validation set
-        test_output: Path to save test set
-        train_ratio: Proportion of data for training (default: 0.7)
-        val_ratio: Proportion of data for validation (default: 0.15)
-        test_ratio: Proportion of data for testing (default: 0.15)
-        random_seed: Random seed for reproducibility
-        stratify_by_language: If True, maintain language distribution across splits
-    """
+    """Split dataset into train/validation/test sets."""
 
     # Validate ratios
     assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6, \
@@ -56,14 +43,14 @@ def split_data(
     print(f"Random seed: {random_seed}")
     print()
 
-    # Show language distribution
+    # language distribution
     print("Language distribution:")
     lang_counts = df['language'].value_counts()
     for lang, count in lang_counts.items():
-        print(f"  {lang}: {count:,} ({count/len(df)*100:.1f}%)")
+        print(f"{lang}: {count:,} ({count/len(df)*100:.1f}%)")
     print()
 
-    # Stratify by language if requested
+    # Stratify by language
     stratify_col = df['language'] if stratify_by_language else None
 
     # First split: train vs (val + test)
@@ -75,7 +62,6 @@ def split_data(
     )
 
     # Second split: val vs test
-    # Adjust the test_size to get correct proportions
     val_size_from_temp = val_ratio / (val_ratio + test_ratio)
 
     val_df, test_df = train_test_split(
@@ -89,35 +75,34 @@ def split_data(
     print(f"Split ratios: {train_ratio:.0%} train, {val_ratio:.0%} val, {test_ratio:.0%} test")
     print()
     print("Split sizes:")
-    print(f"  Train:      {len(train_df):,} sentences ({len(train_df)/len(df)*100:.1f}%)")
-    print(f"  Validation: {len(val_df):,} sentences ({len(val_df)/len(df)*100:.1f}%)")
-    print(f"  Test:       {len(test_df):,} sentences ({len(test_df)/len(df)*100:.1f}%)")
+    print(f"Train:{len(train_df):,} sentences ({len(train_df)/len(df)*100:.1f}%)")
+    print(f"Validation:{len(val_df):,} sentences ({len(val_df)/len(df)*100:.1f}%)")
+    print(f"Test:{len(test_df):,} sentences ({len(test_df)/len(df)*100:.1f}%)")
     print()
 
     # Show language distribution in each split
     print("Language distribution per split:")
     for split_name, split_df in [("Train", train_df), ("Validation", val_df), ("Test", test_df)]:
-        print(f"  {split_name}:")
+        print(f"{split_name}:")
         split_lang_counts = split_df['language'].value_counts()
         for lang in lang_counts.index:  # Use same order as original
             count = split_lang_counts.get(lang, 0)
             pct = count / len(split_df) * 100
-            print(f"    {lang}: {count:,} ({pct:.1f}%)")
+            print(f"{lang}: {count:,} ({pct:.1f}%)")
     print()
 
-    # Create output directory if needed
     Path(train_output).parent.mkdir(parents=True, exist_ok=True)
 
     # Save splits
     print("Saving splits...")
     train_df.to_csv(train_output, index=False)
-    print(f"  ✓ Train saved to: {train_output}")
+    print(f"Train saved to: {train_output}")
 
     val_df.to_csv(val_output, index=False)
-    print(f"  ✓ Validation saved to: {val_output}")
+    print(f"Validation saved to: {val_output}")
 
     test_df.to_csv(test_output, index=False)
-    print(f"  ✓ Test saved to: {test_output}")
+    print(f"Test saved to: {test_output}")
     print()
     print("Done!")
 
@@ -143,20 +128,17 @@ def main():
 
     args = parser.parse_args()
 
-    # Load config
     config = load_config(args.config)
 
-    # Get paths from config
     input_csv = args.input or config['paths']['word_order_csv']
     train_output = config['paths']['train_split']
     val_output = config['paths']['val_split']
     test_output = config['paths']['test_split']
 
-    # Get split settings from config
+    # split settings from config
     split_config = config['data_split']
     random_seed = args.seed if args.seed is not None else split_config['random_seed']
 
-    # Perform split
     split_data(
         input_csv=input_csv,
         train_output=train_output,
