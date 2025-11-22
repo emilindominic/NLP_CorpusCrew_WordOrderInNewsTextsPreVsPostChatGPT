@@ -1,0 +1,45 @@
+# Milestone 2 Configuration
+# Word order extraction and classification settings
+
+project:
+  name: "Word Order Analysis - M2"
+  cutoff_date: "2022-11-30"  # Pre vs Post-ChatGPT split
+
+# Paths
+paths:
+  conllu_dir: "data/conllu"
+  word_order_csv: "data/word_order_all_languages.csv"
+  train_split: "data/splits/train.csv"
+  val_split: "data/splits/val.csv"
+  test_split: "data/splits/test.csv"
+  models_dir: "models"
+  reports_dir: "reports"
+
+# Word order extraction settings
+extraction:
+  # only extract from main clause (prevents mixing clauses)
+  main_clause_only: true
+
+  # minimum elements required
+  require_subject: false  # if true, skip sentences without subject
+  require_object: false   # if true, skip sentences without object
+
+# Data splitting (for ML baseline)
+data_split:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 10  # Group number
+  stratify_by_language: true  # ensure balanced language distribution
+
+# Languages to process
+languages:
+  - code: "eng"
+    name: "english"
+    enabled: true
+  - code: "deu"
+    name: "german"
+    enabled: true
+  - code: "rus"
+    name: "russian"
+    enabled: true
