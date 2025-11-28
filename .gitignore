@@ -24,3 +24,6 @@ data/conllu/
 # Folders
 docs/
 lecture/
+
+# Virtual environments
+venv
