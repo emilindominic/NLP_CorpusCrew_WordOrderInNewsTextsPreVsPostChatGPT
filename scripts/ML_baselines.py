@@ -124,7 +124,7 @@ def generate_md_report(cv_results_all: list[pd.DataFrame], val_results_all: list
     val_df = pd.DataFrame(val_results_all)
 
     # Get best model overall (based on validation f1_weighted)
-    best_overall = val_df.sort_values(by="f1_weighted", ascending=False).iloc[0]
+    best_overall = val_df.sort_values(by="balanced_accuracy", ascending=False).iloc[0]
 
     md = []
 
@@ -166,7 +166,7 @@ def generate_md_report(cv_results_all: list[pd.DataFrame], val_results_all: list
     # OVERALL BEST MODEL
     md.append("## OVERALL BEST MODEL\n")
 
-    md.append("**Best model selected based on validation F1-weighted score**\n\n")
+    md.append("**Best model selected based on balanced accuracy score**\n\n")
     md.append(f"- **Model:** {best_overall['model']}\n")
     md.append(f"- **Feature extractor:** {best_overall['feature']}\n")
     md.append(f"- **Best parameters:** `{best_overall['best_params']}`\n")
