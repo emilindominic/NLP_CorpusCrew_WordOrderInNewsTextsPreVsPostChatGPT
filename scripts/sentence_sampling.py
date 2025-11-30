@@ -21,7 +21,14 @@ def sample_sentences(df, languages, n_per_period=50, seed=42):
         samples.append(pre)
         samples.append(post)
 
-    return pd.concat(samples).reset_index(drop=True)
+    # Combine everything
+    out_df = pd.concat(samples).reset_index(drop=True)
+
+    # Add empty columns for manual annotation
+    out_df['true_word_order'] = ""
+    out_df['notes'] = ""
+
+    return out_df
 
 
 def main():
