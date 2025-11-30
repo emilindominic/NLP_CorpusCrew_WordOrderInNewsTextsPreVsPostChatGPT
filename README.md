@@ -1,6 +1,6 @@
 # Course: NLP & Information Extraction (2025WS)
 
-**Topic: Word Order Change in News Before and After ChatGPT**
+**Topic 4: Word Order Change in News Before and After ChatGPT**
 
 ---
 
@@ -15,9 +15,6 @@
 | Tehseen Ali Tahir| 12433763 |
 
 ---
-## Project Overview
-Our project investigates **word order patterns in online news articles** before and after the public release of ChatGPT (Nov 2022).
-We analyze how syntactic preferences may have shifted between the *Pre-ChatGPT* and *Post-ChatGPT* periods in **English, German, and Russian**, using corpora from the **Leipzig Corpora Collection (News)**.
 
 # Milestone 2: Word Order Extraction & Analysis
 
@@ -29,16 +26,11 @@ We analyze how syntactic preferences may have shifted between the *Pre-ChatGPT* 
       - **Simple heuristic**: find first verb; check if nouns appear before/after --> SVO, SV_only, VO_only, INCOMPLETE.
       - **POS-pattern**: first verb + first two nouns as S/V/O candidates; map to canonical orders or INCOMPLETE.
     - ML (binary): predict **SVO vs non-SVO** using BoW/TF-IDF features with Logistic Regression, Multinomial Naive Bayes and Linear SVM.
-  - **Evaluation**: Rule-based baselines evaluated on Stanza derived labels; report in `reports/rule_based_baselines.md`.
+  - **Evaluation**: Rule-based baselines evaluated against Stanza-derived labels (`reports/rule_based_baselines.md`); ML CV/val in `reports/ML_baselines.md`.
 
 
 ## Ground truth using Stanza
-The extraction focuses on the **main clause only** to avoid mixing elements from different parts of complex sentences. We look for:
-- **Subject (S)**: nouns that act as the subject of the main verb
-- **Verb (V)**: the root verb of the sentence
-- **Object (O)**: direct objects of the main verb
-
-Based on their positions in the sentence, we classify them into one of six possible orders: SVO, SOV, VSO, VOS, OSV, or OVS. If sentence is missing some elements, we label it as incomplete or partial (like "SV_only" if there is no object).
+We treat Stanza dependency parses as the current “ground truth”: main-clause root verb, nsubj/nsubj:pass and obj linked to that root define S/V/O and the order label. This is our working label source for baselines and ML. For the final stage we’ll add a small human-annotated gold set (~300 sentences) to measure Stanza’s error rate and re-interpret model scores accordingly.
 
 ## Running the Pipeline
 
@@ -106,21 +98,27 @@ All settings are in `config/m2_config.yaml`:
 ```
 ├─ config/
 │  └─ m2_config.yaml                # M2 settings (word order extraction, data split)
-│
+│  └─ ML_baselines.py
 ├─ data/
 │  ├─ word_order_all_languages.csv  # extracted word orders for all sentences
+│  ├─ pos_pattern_predictions.csv
+│  ├─ simple_heuristic_predictions.csv
 │  └─ splits/                       # train/val/test splits for ML
 │     ├─ train.csv
 │     ├─ val.csv
 │     └─ test.csv
-│
 ├─ scripts/
 │  ├─ extract_word_order.py         # extracts S-V-O patterns from CoNLL-U files
-│  └─ split_data.py                 # splits data into train/val/test sets
-│
+│  ├─ split_data.py                 # splits data into train/val/test sets
+│  ├─ simple_heuristic_baseline.py
+│  ├─ pos_pattern_baseline.py
+│  ├─ evaluate_baselines.py
+│  └─ ML_baselines.py
 ├─ reports/                         # analysis outputs and statistics
-│
+│  ├─ ML_baselines.md
+│  └─ rule_based_baselines.md
 ├─ run_word_order.sh                # convenient script to run word order extraction
+├─ run_rule_based.sh
 └─ requirements.txt                 # Python dependencies
 ```
 
