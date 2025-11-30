@@ -22,16 +22,17 @@ We analyze how syntactic preferences may have shifted between the *Pre-ChatGPT* 
 # Milestone 2: Word Order Extraction & Analysis
 
 ## What We Did
+  - **Word Order Extraction**: From M1 CoNLL-U files, extract main-clause S, V, O and assign a word order label (SVO/SOV/VSO/VOS/OSV/OVS or partials like SV_only, VO_only, INCOMPLETE).
+  - **Data Splitting**: Stratified by language into train/val/test.
+  - **Baselines**:
+    - Rule-based:
+      - **Simple heuristic**: find first verb; check if nouns appear before/after --> SVO, SV_only, VO_only, INCOMPLETE.
+      - **POS-pattern**: first verb + first two nouns as S/V/O candidates; map to canonical orders or INCOMPLETE.
+    - ML (binary): predict **SVO vs non-SVO** using BoW/TF-IDF features with Logistic Regression, Multinomial Naive Bayes and Linear SVM.
+  - **Evaluation**: Rule-based baselines evaluated on Stanza derived labels; report in `reports/rule_based_baselines.md`.
 
-In Milestone 2, we extracted word order patterns from the dependency-parsed sentences we created in M1. The goal was to identify how subjects, verbs and objects are arranged in news articles across three languages.
 
-### Main Tasks:
-1. **Word Order Extraction**: We wrote script that reads CoNLL-U files from M1 and identifies the Subject-Verb-Object structure in each sentence
-2. **Pattern Classification**: Each sentence gets labeled with its word order pattern (like SVO, SOV, VSO, etc)
-3. **Data Splitting**: We split the extracted data into training, validation and test sets for future machine learning experiments.
-4. continue...
-### How It Works
-
+## Ground truth using Stanza
 The extraction focuses on the **main clause only** to avoid mixing elements from different parts of complex sentences. We look for:
 - **Subject (S)**: nouns that act as the subject of the main verb
 - **Verb (V)**: the root verb of the sentence
@@ -43,25 +44,27 @@ Based on their positions in the sentence, we classify them into one of six possi
 
 Make sure you already completed Milestone 1 and have the `.conllu` files in `data/conllu/`.
 
-### Step 1: Extract Word Orders
+### Extract Word Orders
 
 ```bash
-# Process all languages
+# Process all languages (default output: data/word_order_all_languages.csv)
 bash run_word_order.sh
 
-# Or use Python directly
-python scripts/extract_word_order.py --input data/conllu --output data/word_order_all_languages.csv
-
-# Test mode (useful for quick checks)
+# Test mode (limit sentences per file)
 bash run_word_order.sh --test 100
+
+# Direct Python
+python scripts/extract_word_order.py --input data/conllu --output data/word_order_all_languages.csv
 ```
 
-This creates `data/word_order_all_languages.csv` with word order labels for all sentences.
-
-### Step 2: Split Data
+### Split Data
 
 ```bash
-python scripts/split_data.py --config config/m2_config.yaml
+# Auto-download spaCy models if missing
+bash run_rule_based.sh
+
+# Skip model download if already installed
+bash run_rule_based.sh --skip-download
 ```
 
 This creates three files in `data/splits/`:
@@ -71,6 +74,19 @@ This creates three files in `data/splits/`:
 
 The split is stratified by language, so each set has balanced mix of English, German and Russian sentences.
 
+### Rule-Based Baselines + Evaluation
+
+```bash
+python scripts/split_data.py --config config/m2_config.yaml
+```
+
+### ML Baselines + Evaluation
+
+```bash
+python scripts/ML_baselines.py
+```
+Output: reports/ML_baselines.md (CV + validation results).
+
 ## Configuration
 
 All settings are in `config/m2_config.yaml`:
@@ -79,21 +95,11 @@ All settings are in `config/m2_config.yaml`:
 - **random_seed**: 10 (our group number)
 - **stratify_by_language**: keeps language distribution balanced across splits
 
-## What We Got
-
-After running the pipeline, we extracted **154,192 sentences** from all three languages:
-- **English**: 47,109 sentences (29.1% are SVO)
-- **German**: 55,041 sentences (10.8% are SVO)
-- **Russian**: 52,042 sentences (14.5% are SVO)
-
-### Word Order Distribution:
-- **SV_only**: 48.1% (sentences with subject and verb, but no direct object)
-- **INCOMPLETE**: 23.3% (missing key elements)
-- **SVO**: 17.7% (full Subject-Verb-Object pattern)
-- **SOV**: 3.6%
-- **Others**: less than 3% each
-
-The data shows that English strongly prefers SVO order, while German and Russian use it less often (which makes sense given their more flexible word order).
+## Future Work (Final Submission)
+- Multiclass: train/evaluate on full word-order labels (not just SVO vs other).
+- Human gold standard (~300 sentences): use to measure Stanza parsing error and contextualize baseline/ML scores.
+- Temporal stats: clean year/period, run chi-square or similar tests to quantify pre/post shifts; answer topic questions with plots/tables.
+- Qualitative analysis: inspect common parser/model errors (SVO vs non-SVO flips).
 
 ## Repository Structure (M2 additions)
 

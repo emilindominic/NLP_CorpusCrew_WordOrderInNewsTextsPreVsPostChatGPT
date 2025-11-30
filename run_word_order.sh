@@ -9,7 +9,7 @@ cd "$SCRIPT_DIR"
 LANG=""
 TEST_MODE=""
 INPUT="data/conllu"
-OUTPUT="data/word_order_labeled.csv"
+OUTPUT="data/word_order_all_languages.csv"
 
 # Help message
 show_help() {
@@ -22,7 +22,7 @@ Options:
     --lang LANG         Process only specific language (eng|deu|rus)
     --test N            Test mode: process only N sentences per file
     --input PATH        Input CoNLL-U file or directory (default: data/conllu)
-    --output PATH       Output CSV file (default: data/word_order_labeled.csv)
+    --output PATH       Output CSV file (default: data/word_order_all_languages.csv)
     -h, --help          Show this help message
 
 Examples:
