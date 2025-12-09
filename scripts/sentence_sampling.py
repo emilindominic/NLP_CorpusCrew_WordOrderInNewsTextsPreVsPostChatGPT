@@ -1,25 +1,18 @@
 import pandas as pd
 
-def sample_sentences(df, languages, n_per_period=50, seed=42):
+def sample_sentences(df, languages, n_samples=20, seed=10):
     samples = []
 
     for lang in languages:
         df_lang = df[df['language'] == lang]
 
-        # Pre-ChatGPT sampling
-        pre = df_lang[df_lang['period'] == 'Pre-ChatGPT'].sample(
-            n=n_per_period, random_state=seed
+        # Sample N sentences for this language
+        lang_sample = df_lang.sample(
+            n=n_samples,
+            random_state=seed
         )
-        pre['sample_period'] = 'Pre'
 
-        # Post-ChatGPT sampling
-        post = df_lang[df_lang['period'] == 'Post-ChatGPT'].sample(
-            n=n_per_period, random_state=seed
-        )
-        post['sample_period'] = 'Post'
-
-        samples.append(pre)
-        samples.append(post)
+        samples.append(lang_sample)
 
     # Combine everything
     out_df = pd.concat(samples).reset_index(drop=True)
@@ -32,13 +25,18 @@ def sample_sentences(df, languages, n_per_period=50, seed=42):
 
 
 def main():
-    df = pd.read_csv('data/word_order_all_languages.csv')
+    df = pd.read_csv('data/splits/test.csv')
 
     languages = ['eng', 'deu', 'rus']
 
-    sampled_df = sample_sentences(df, languages, n_per_period=50)
-    sampled_df.to_csv('data/manual_annotation_sample.csv', index=False)
+    sampled_df = sample_sentences(
+        df,
+        languages,
+        n_samples=20,
+        seed=10
+    )
 
+    sampled_df.to_csv('data/manual_annotation_sample.csv', index=False)
     print("Saved manual annotation sample to data/manual_annotation_sample.csv")
 
 
