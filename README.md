@@ -11,7 +11,7 @@
 |------------------|----------|
 | Assylbek Tleules | 12432843 |
 | Emily Jacob      | 12143768 |
-| Luka             | 12332270 |
+| Luka Santek      | 12332270 |
 | Tehseen Ali Tahir| 12433763 |
 
 ---
@@ -26,7 +26,8 @@
       - **Simple heuristic**: find first verb; check if nouns appear before/after --> SVO, SV_only, VO_only, INCOMPLETE.
       - **POS-pattern**: first verb + first two nouns as S/V/O candidates; map to canonical orders or INCOMPLETE.
     - ML (binary): predict **SVO vs non-SVO** using BoW/TF-IDF features with Logistic Regression, Multinomial Naive Bayes and Linear SVM.
-  - **Evaluation**: Rule-based baselines evaluated against Stanza-derived labels (`reports/rule_based_baselines.md`); ML CV/val in `reports/ML_baselines.md`.
+    - ML (multiclass): predict SVO word order as one of the 9 classes (SVO, SV_only, VSO, INCOMPLETE, etc.) with Logistic Regression, Multinomial Naive Bayes and Linear SVM.
+  - **Evaluation**: Rule-based baselines evaluated against Stanza-derived labels (`reports/rule_based_baselines.md`); ML CV/val in `reports/report_binary.md` and `reports/report_multiclass.md`.
 
 
 ## Ground truth using Stanza
@@ -77,7 +78,7 @@ python scripts/split_data.py --config config/m2_config.yaml
 ```bash
 python scripts/ML_baselines.py
 ```
-Output: reports/ML_baselines.md (CV + validation results).
+Output: reports/report_binary.md and reports/report_multiclass.md (CV + validation results).
 
 ## Configuration
 
@@ -88,7 +89,6 @@ All settings are in `config/m2_config.yaml`:
 - **stratify_by_language**: keeps language distribution balanced across splits
 
 ## Future Work (Final Submission)
-- Multiclass: train/evaluate on full word-order labels (not just SVO vs other).
 - Human gold standard (~300 sentences): use to measure Stanza parsing error and contextualize baseline/ML scores.
 - Temporal stats: clean year/period, run chi-square or similar tests to quantify pre/post shifts; answer topic questions with plots/tables.
 - Qualitative analysis: inspect common parser/model errors (SVO vs non-SVO flips).
@@ -115,7 +115,8 @@ All settings are in `config/m2_config.yaml`:
 │  ├─ evaluate_baselines.py
 │  └─ ML_baselines.py
 ├─ reports/                         # analysis outputs and statistics
-│  ├─ ML_baselines.md
+│  ├─ report_binary.md.md
+│  ├─ report_multiclass.md
 │  └─ rule_based_baselines.md
 ├─ run_word_order.sh                # convenient script to run word order extraction
 ├─ run_rule_based.sh
