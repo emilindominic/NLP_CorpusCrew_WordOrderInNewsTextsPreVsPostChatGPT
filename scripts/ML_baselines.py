@@ -6,14 +6,14 @@ Generates a Markdown report summarizing cross-validation and validation results.
 import pandas as pd
 import re
 import unicodedata
-from config.ML_baselines import *
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, balanced_accuracy_score
 from sklearn.base import clone
 from datetime import datetime
 from pathlib import Path
-
+import sys
+from config.ML_baselines import *
 
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -101,18 +101,22 @@ def extract_features(
 
     return X_train_vec, X_val_vec
 
-def generate_md_report(cv_results_all: list[pd.DataFrame], val_results_all: list[dict]) -> None:
+def generate_md_report(cv_results_all: list[pd.DataFrame],
+                       val_results_all: list[dict],
+                       report_file: str,
+                       task_name: str) -> None:
     """
-    Generate Markdown report from CV and validation results.
+    Generate a Markdown report summarizing cross-validation and validation results.
     Args:
-        cv_results_all (list[pd.DataFrame]): List of DataFrames with CV results.
-        val_results_all (list[dict]): List of dictionaries with validation results.
+        cv_results_all (list[pd.DataFrame]): List of DataFrames containing cross-validation results for each model/feature combination.
+        val_results_all (list[dict]): List of dictionaries containing validation metrics for the best model configuration per model/feature combination.
+        report_file (str): Path to the output Markdown file that will be generated.
+        task_name (str): Name of the experiment task, e.g. "binary" or "multiclass". Used to label the report.
     Returns:
         None
     """
     
-    project_root = Path(__file__).resolve().parents[1]
-    output_file = project_root / REPORT_FILE
+    output_file = Path(report_file)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -129,7 +133,7 @@ def generate_md_report(cv_results_all: list[pd.DataFrame], val_results_all: list
     md = []
 
     # HEADER
-    md.append("# ML_BASELINE REPORT\n")
+    md.append(f"# ML_BASELINE REPORT ({task_name.upper()})\n")
     md.append(f"Generated on: **{now}**\n")
     md.append("---\n")
 
@@ -181,37 +185,28 @@ def generate_md_report(cv_results_all: list[pd.DataFrame], val_results_all: list
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
 
-def main() -> None:
+def run_experiment(task_name: str,
+                   y_train,
+                   y_val,
+                   report_path: str,
+                   X_train,
+                   X_val):
     """
-    Main function that does the following:
-    1. Load data
-    2. Preprocess sentences
-    3. Encode target labels as binary
-    4. For each model and feature extraction method:
-        a. Extract features
-        b. Perform GridSearchCV for hyperparameter tuning
-        c. Collect cross-validation results
-        d. Evaluate best model on validation set
-        e. Collect validation results
-    5. Generate Markdown report
+    Run a full baseline experiment (binary or multiclass):
+    - Extract features
+    - Train models with GridSearchCV
+    - Collect CV and validation metrics
+    - Generate a Markdown report
     Args:
-        None
+        task_name (str): Label for this task, e.g., "binary" or "multiclass".
+        y_train (pd.Series): Encoded training labels (binary or multiclass).
+        y_val (pd.Series): Encoded validation labels (binary or multiclass).
+        report_path (str): Path where the Markdown report should be written.
+        X_train, X_val (pd.Series): Preprocessed text input fields.
     Returns:
         None
     """
 
-    # Load data
-    train_data, val_data = load_data()
-
-    # Preprocess text
-    X_train = train_data["sentence"].apply(preprocess_text)
-    X_val = val_data["sentence"].apply(preprocess_text)
-
-    # Encode target labels
-    y_train = encode_target(train_data, target_col="word_order")
-    y_val = encode_target(val_data, target_col="word_order")
-
-    # Lists for storing results
     cv_results_all = []
     val_results_all = []
 
@@ -223,10 +218,10 @@ def main() -> None:
 
         for method in methods:
 
-            # Extract features
+            # Feature extraction
             X_train_vec, X_val_vec = extract_features(X_train, X_val, method=method)
 
-            # GridSearchCV for hyperparameter tuning
+            # GridSearchCV
             grid = GridSearchCV(
                 clone(model),
                 param_grid,
@@ -235,12 +230,10 @@ def main() -> None:
                 cv=5,
                 n_jobs=-1,
             )
-
             grid.fit(X_train_vec, y_train)
 
-            # Collect cross-validation results
+            # ----- CV RESULTS -----
             cv_table = pd.DataFrame(grid.cv_results_)
-
             cols = {
                 "mean_fit_time": "fit_time",
                 "mean_test_f1_weighted": "f1_weighted",
@@ -263,35 +256,73 @@ def main() -> None:
 
             cv_results_all.append(cv_view)
 
-            # Evaluate best model on validation set
+            # ----- VALIDATION RESULTS -----
             best_model = grid.best_estimator_
-            best_params = grid.best_params_
-
             y_pred = best_model.predict(X_val_vec)
 
-            f1_weighted = f1_score(y_val, y_pred, average="weighted", zero_division=0)
-            f1_macro = f1_score(y_val, y_pred, average="macro", zero_division=0)
-            precision = precision_score(y_val, y_pred, average="macro", zero_division=0)
-            recall = recall_score(y_val, y_pred, average="macro", zero_division=0)
-            accuracy = accuracy_score(y_val, y_pred)
-            balanced_accuracy = balanced_accuracy_score(y_val, y_pred)
-
-            # Collect validation results
             val_results_all.append({
                 "feature": method,
                 "model": model_name,
-                "best_params": best_params,
+                "best_params": grid.best_params_,
                 "fit_time": round(grid.refit_time_, 4),
-                "f1_weighted": round(f1_weighted, 4),
-                "f1_macro": round(f1_macro, 4),
-                "precision_macro": round(precision, 4),
-                "recall_macro": round(recall, 4),
-                "accuracy": round(accuracy, 4),
-                "balanced_accuracy": round(balanced_accuracy, 4)
+                "f1_weighted": round(f1_score(y_val, y_pred, average="weighted", zero_division=0), 4),
+                "f1_macro": round(f1_score(y_val, y_pred, average="macro", zero_division=0), 4),
+                "precision_macro": round(precision_score(y_val, y_pred, average="macro", zero_division=0), 4),
+                "recall_macro": round(recall_score(y_val, y_pred, average="macro", zero_division=0), 4),
+                "accuracy": round(accuracy_score(y_val, y_pred), 4),
+                "balanced_accuracy": round(balanced_accuracy_score(y_val, y_pred), 4)
             })
 
-    # Generate report
-    generate_md_report(cv_results_all=cv_results_all, val_results_all=val_results_all,)
+    # Write report for this experiment
+    generate_md_report(
+        cv_results_all=cv_results_all,
+        val_results_all=val_results_all,
+        report_file=report_path,
+        task_name=task_name
+    )
+
+def main() -> None:
+    """
+    Runs two experiments:
+
+    1. Binary classification (SVO vs other)
+    2. Multiclass classification (predicting original word_order)
+
+    Produces two separate Markdown reports.
+    """
+
+    # Load data
+    train_data, val_data = load_data()
+
+    # Preprocess text
+    X_train = train_data["sentence"].apply(preprocess_text)
+    X_val = val_data["sentence"].apply(preprocess_text)
+
+    # 1. BINARY TARGET (your original encoding)
+    y_train_bin = encode_target(train_data, target_col="word_order")
+    y_val_bin = encode_target(val_data, target_col="word_order")
+
+    run_experiment(
+        task_name="binary",
+        y_train=y_train_bin,
+        y_val=y_val_bin,
+        report_path="reports/report_binary.md",
+        X_train=X_train,
+        X_val=X_val
+    )
+
+    # 2. MULTICLASS
+    y_train_multi = train_data["word_order"]
+    y_val_multi = val_data["word_order"]
+
+    run_experiment(
+        task_name="multiclass",
+        y_train=y_train_multi,
+        y_val=y_val_multi,
+        report_path="reports/report_multiclass.md",
+        X_train=X_train,
+        X_val=X_val
+    )
 
 if __name__ == "__main__":    
     main()
