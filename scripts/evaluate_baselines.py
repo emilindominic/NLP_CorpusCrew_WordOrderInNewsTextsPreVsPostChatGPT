@@ -13,29 +13,17 @@ from sklearn.metrics import (
 from datetime import datetime
 from pathlib import Path
 
-
-def encode_binary(series):
-    """SVO = 1, everything else = 0"""
-    return (series == "SVO").astype(int)
-
-
 def evaluate_method(y_true, y_pred, method_name):
-    """Calculate all metrics for a classification method."""
-    y_true_bin = encode_binary(y_true)
-    y_pred_bin = encode_binary(y_pred)
-
+    labels = sorted(set(y_true.dropna()) | set(y_pred.dropna()))
     metrics = {
         'method': method_name,
-        'accuracy': accuracy_score(y_true_bin, y_pred_bin),
-        'balanced_accuracy': balanced_accuracy_score(y_true_bin, y_pred_bin),
-        'f1_weighted': f1_score(y_true_bin, y_pred_bin, average='weighted', zero_division=0),
-        'f1_macro': f1_score(y_true_bin, y_pred_bin, average='macro', zero_division=0),
-        'precision_macro': precision_score(y_true_bin, y_pred_bin, average='macro', zero_division=0),
-        'recall_macro': recall_score(y_true_bin, y_pred_bin, average='macro', zero_division=0),
+        'accuracy': accuracy_score(y_true, y_pred),
+        'f1_macro': f1_score(y_true, y_pred, average='macro', zero_division=0),
+        'f1_weighted': f1_score(y_true, y_pred, average='weighted', zero_division=0),
+        'balanced_accuracy': balanced_accuracy_score(y_true, y_pred, zero_division=0)
     }
-
-    cm = confusion_matrix(y_true_bin, y_pred_bin)
-    return metrics, cm
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    return metrics, cm, labels
 
 
 def generate_report(results, confusion_matrices, output_file):
@@ -59,31 +47,20 @@ def generate_report(results, confusion_matrices, output_file):
     md.append("\n\n---\n\n")
 
     md.append("## CONFUSION MATRICES\n\n")
-    md.append("Format: [TN, FP] / [FN, TP]\n\n")
+    md.append("Format: rows = gold, columns = predicted\n\n")
 
-    for method, cm in confusion_matrices.items():
+
+    for method, (cm, labels) in confusion_matrices.items():
         md.append(f"### {method}\n\n")
         md.append("```\n")
-        md.append(f"                Predicted\n")
-        md.append(f"                Non-SVO    SVO\n")
-        md.append(f"Actual Non-SVO  {cm[0][0]:>6}  {cm[0][1]:>6}\n")
-        md.append(f"       SVO      {cm[1][0]:>6}  {cm[1][1]:>6}\n")
+        md.append("Stanza-Gold \\ Pred → " + " ".join(f"{l:>7}" for l in labels) + "\n")
+
+        for i, gold in enumerate(labels):
+            row = " ".join(f"{cm[i,j]:>7}" for j in range(len(labels)))
+            md.append(f"{gold:>12} {row}\n")
+
         md.append("```\n\n")
 
-        tn, fp = cm[0]
-        fn, tp = cm[1]
-
-        recall_non_svo = tn / (tn + fp) if (tn + fp) > 0 else 0
-        recall_svo = tp / (tp + fn) if (tp + fn) > 0 else 0
-        precision_svo = tp / (tp + fp) if (tp + fp) > 0 else 0
-
-        md.append(f"Recall (Non-SVO): {recall_non_svo:.2%}\n")
-        md.append(f"Recall (SVO): {recall_svo:.2%}\n")
-        md.append(f"Precision (SVO): {precision_svo:.2%}\n")
-        md.append(f"Missed SVO (FN): {fn}\n")
-        md.append(f"False SVO (FP): {fp}\n\n")
-
-    md.append("---\n\n")
 
     md.append("## RANKING BY BALANCED ACCURACY\n\n")
     ranked = df_results.sort_values('balanced_accuracy', ascending=False)
@@ -120,15 +97,16 @@ def main():
 
     # Evaluate POS-pattern
     print("\nEvaluating POS-pattern baseline...")
-    metrics_pos, cm_pos = evaluate_method(y_true, test_df['pred_pos_pattern'], 'POS-Pattern')
+    metrics_pos, cm_pos, labels = evaluate_method(y_true, test_df['pred_pos_pattern'], 'POS-Pattern')
     results.append(metrics_pos)
-    confusion_matrices['POS-Pattern'] = cm_pos
+    confusion_matrices['POS-Pattern'] = (cm_pos, labels)
 
     # Evaluate simple heuristics
     print("Evaluating simple heuristic baseline...")
-    metrics_simple, cm_simple = evaluate_method(y_true, test_df['pred_simple_heuristic'], 'Simple Heuristic')
+    metrics_simple, cm_simple, _ = evaluate_method(y_true, test_df['pred_simple_heuristic'], 'Simple Heuristic')
     results.append(metrics_simple)
-    confusion_matrices['Simple Heuristic'] = cm_simple
+    confusion_matrices['Simple Heuristic'] = (cm_simple, labels)
+
 
     print("\n" + "=" * 60)
     df_results = pd.DataFrame(results)

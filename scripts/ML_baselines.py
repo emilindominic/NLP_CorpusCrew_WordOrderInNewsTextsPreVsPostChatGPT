@@ -116,6 +116,7 @@ def generate_md_report(cv_results_all: list[pd.DataFrame],
         None
     """
     
+    print(f"[REPORT] Generating report -> {report_file}")
     output_file = Path(report_file)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -184,6 +185,7 @@ def generate_md_report(cv_results_all: list[pd.DataFrame],
     # Write to file
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
+    print(f"[REPORT] Written report: {report_file}")
 
 def run_experiment(task_name: str,
                    y_train,
@@ -207,21 +209,25 @@ def run_experiment(task_name: str,
         None
     """
 
+    print(f"[EXP] Starting experiment: {task_name}")
     cv_results_all = []
     val_results_all = []
 
     for model_name, model in BASE_MODELS.items():
+        print(f"[EXP] Model: {model_name}")
 
         methods = FEATURE_EXTRACTORS[model_name]
         param_grid = PARAM_GRIDS[model_name]
         scoring = SCORING_METRICS
 
         for method in methods:
+            print(f"[EXP] Feature extractor: {method}")
 
             # Feature extraction
             X_train_vec, X_val_vec = extract_features(X_train, X_val, method=method)
 
             # GridSearchCV
+            print(f"[EXP] Starting GridSearchCV for {model_name} + {method}")
             grid = GridSearchCV(
                 clone(model),
                 param_grid,
@@ -231,6 +237,7 @@ def run_experiment(task_name: str,
                 n_jobs=-1,
             )
             grid.fit(X_train_vec, y_train)
+            print(f"[EXP] GridSearchCV done for {model_name} + {method}; best_params={grid.best_params_}")
 
             # ----- CV RESULTS -----
             cv_table = pd.DataFrame(grid.cv_results_)
@@ -260,7 +267,7 @@ def run_experiment(task_name: str,
             best_model = grid.best_estimator_
             y_pred = best_model.predict(X_val_vec)
 
-            val_results_all.append({
+            val_res = {
                 "feature": method,
                 "model": model_name,
                 "best_params": grid.best_params_,
@@ -271,7 +278,10 @@ def run_experiment(task_name: str,
                 "recall_macro": round(recall_score(y_val, y_pred, average="macro", zero_division=0), 4),
                 "accuracy": round(accuracy_score(y_val, y_pred), 4),
                 "balanced_accuracy": round(balanced_accuracy_score(y_val, y_pred), 4)
-            })
+            }
+
+            val_results_all.append(val_res)
+            print(f"[EXP] Validation ({model_name} + {method}): f1_weighted={val_res['f1_weighted']}, balanced_accuracy={val_res['balanced_accuracy']}")
 
     # Write report for this experiment
     generate_md_report(
@@ -280,6 +290,7 @@ def run_experiment(task_name: str,
         report_file=report_path,
         task_name=task_name
     )
+    print(f"[EXP] Experiment {task_name} finished; report at {report_path}")
 
 def main() -> None:
     """
@@ -291,12 +302,16 @@ def main() -> None:
     Produces two separate Markdown reports.
     """
 
+    print("[MAIN] Loading data")
     # Load data
     train_data, val_data = load_data()
+    print(f"[MAIN] Loaded train={len(train_data)} rows, val={len(val_data)} rows")
 
     # Preprocess text
+    print("[MAIN] Preprocessing text fields")
     X_train = train_data["sentence"].apply(preprocess_text)
     X_val = val_data["sentence"].apply(preprocess_text)
+    print(f"[MAIN] Preprocessing done; sample: {X_train.iloc[0] if len(X_train)>0 else 'N/A'}")
 
     # 1. BINARY TARGET (your original encoding)
     y_train_bin = encode_target(train_data, target_col="word_order")

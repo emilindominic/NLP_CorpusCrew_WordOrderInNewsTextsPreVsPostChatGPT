@@ -7,6 +7,7 @@
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from sklearn.metrics import make_scorer, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score
 
 ROOT_DIR = "./data/splits/"
 REPORT_DIR = "reports"
@@ -41,10 +42,10 @@ PARAM_GRIDS = {
 }
 
 SCORING_METRICS = {
-    "accuracy": "accuracy",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1_weighted": "f1_weighted",
-    "f1_macro": "f1_macro",
-    "precision_macro": "precision_macro",
-    "recall_macro": "recall_macro",
+    "accuracy": make_scorer(accuracy_score),
+    "balanced_accuracy": make_scorer(balanced_accuracy_score),
+    "f1_weighted": make_scorer(f1_score, average="weighted", zero_division=0),
+    "f1_macro": make_scorer(f1_score, average="macro", zero_division=0),
+    "precision_macro": make_scorer(precision_score, average="macro", zero_division=0),
+    "recall_macro": make_scorer(recall_score, average="macro", zero_division=0),
 }
