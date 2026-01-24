@@ -1,0 +1,58 @@
+project:
+  cutoff_date: "2022-11-30"
+  min_tokens: 8
+  deduplicate: true
+  output_combined: true
+
+paths:
+  clean_root: "data/clean"
+  conllu_root: "data/conllu"
+
+# Language selection - comment out to disable
+languages:
+  - code: "eng"
+    name: "english"
+    raw_dir: "data/raw/english"
+    enabled: true  #set to false to skip
+    corpora:
+      - "eng_news_2018_10K"
+      - "eng_news_2019_10K"
+      - "eng_news_2020_10K"
+      - "eng_news_2023_10K"
+      - "eng_news_2024_10K"
+    special_rules:
+      split_2022_by_month: true
+
+  - code: "deu"
+    name: "german"
+    raw_dir: "data/raw/german"
+    enabled: true
+    corpora:
+      - "deu_news_2019_10K"
+      - "deu_news_2020_10K"
+      - "deu_news_2021_10K"
+      - "deu_news_2022_10K"
+      - "deu_news_2023_10K"
+      - "deu_news_2024_10K"
+    special_rules:
+      split_2022_by_month: true
+
+  - code: "rus"
+    name: "russian"
+    raw_dir: "data/raw/russian"
+    enabled: true
+    corpora:
+      - "rus_news_2019_10K"
+      - "rus_news_2020_10K"
+      - "rus_news_2021_10K"
+      - "rus_news_2022_10K"
+      - "rus_news_2023_10K"
+      - "rus_news_2024_10K"
+    special_rules:
+      split_2022_by_month: true
+
+# Annotation settings
+annotation:
+  max_sentences_per_file: null  # null = all, or set number for testing
+  batch_size: 100
+  use_gpu: false  # set true if you have CUDA
