@@ -1,0 +1,2 @@
+*.conllu filter=lfs diff=lfs merge=lfs -text
+data/conllu/*.conllu filter=lfs diff=lfs merge=lfs -text

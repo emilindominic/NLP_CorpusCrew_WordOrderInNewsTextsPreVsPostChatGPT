@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+
+# OS
+.DS_Store
+data/**/.DS_Store
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Generated reports
+reports/*.html
+reports/*.png
+
+# Folders
+lecture/
+
+# Virtual environments
+venv

@@ -1,0 +1,28 @@
+language	sentence	true_word_order	word_order_y	subj_text_x	verb_text_x	obj_text_x	subj_text_y	verb_text_y	obj_text_y	notes
+eng	“ With today ’s busy lifestyle fast food is an easy option that people choose . ”	OSV	INCOMPLETE							wrong prediction
+eng	Some of those business leaders from companies including CVS , Walmart , Walgreens and others , later spoke at a Rose Garden news conference to unveil the plan , pledging to increase development and delivery of test kits and equipment .	SVO	SV_only	Some	spoke		Some	spoke		wrong prediction
+eng	That ’s like a pastor saying he ’s collecting offering for the church , but spending it on himself .	SVO	INCOMPLETE							wrong prediction
+eng	It is also as if you have to make a covenant between you and the people , ” the JLP leader added .	SVO	SV_only	leader	added		leader	added		wrong prediction
+eng	Labour activists say the cut is being raised on the doorsteps and was partly to blame for local by - election defeats in Edinburgh and Dundee .	SVO	SV_only	activists	say		activists	say		wrong prediction
+eng	But it can also be viewed as an opportunity due to panic selling - which I believe happened in a number of PIMCO 's muni CEFs .	SVO	SV_only	it	viewed		it	viewed		wrong prediction
+eng	One of the candidates is incumbent MP Zarah Sultana who was elected in 2019 .	SVO	INCOMPLETE							wrong prediction
+deu	Diese wissenschaftlich erprobten Gedächtnis - Fitnessübungen sind ein abwechslungsreiches Training für die kleinen grauen Zellen .	SVO	INCOMPLETE							wrong prediction
+deu	Ein deutscher Professor , der in engem Kontakt mit einem Krankenhaus in Wuhan steht , erklärt , welche sieben Lehren wir hierzulande daraus ziehen können .	SVO	SV_only	Professor	erklärt		Professor	erklärt		wrong prediction
+deu	Es tat ihm gut , diesen Monat komplett trainieren zu können “ , lobte - Coach Terzic mit Verweis auf den zuletzt überschaubaren Terminkalender ohne Englische Wochen , machte aber auch deutlich : „ Wir hoffen , dass wir die Grenze noch nicht erreicht haben .	SVO	SV_only	Coach	lobte		Coach	lobte		wrong prediction
+deu	In dem vergangenen Jahr wurden bis Ende September etwas mehr als 200 Verdächtige mithilfe der Videofilme identifiziert .	OVS	SV_only	Verdächtige	identifiziert		Verdächtige	identifiziert		wrong prediction
+deu	"Wir setzen auf Stabilität und Kontinuität , um diese Herausforderungen zu bewältigen "" , betonte SPÖ - Klubobmann Hannes Schwarz , dass für die SP Neuwahlen nicht zu der Debatte stünden ."	SVO	SV_only	Wir	setzen		Wir	setzen		wrong prediction
+deu	Bei dem Damen- ​Teamspringen konnte die deutsche Mannschaft mit Vogt , Katharina Althaus , Ramona Straub und Juliane Seyfarth ihrer Favoritenrolle gerecht werden und siegte vor Österreich und Norwegen .	OVS	INCOMPLETE							wrong prediction
+deu	In insgesamt 15 Spielen errangen sie nur je einen Sieg .	OVS	VSO	sie	errangen	Sieg	sie	errangen	Sieg	wrong prediction
+deu	In dem Juli fanden Montagearbeiter in einer Bunkeranlage in einem Wald in Oranienburg die Leiche der 26 - Jährigen .	OVS	VSO	Montagearbeiter	fanden	Leiche	Montagearbeiter	fanden	Leiche	wrong prediction
+deu	Bis Mittwoch hinderte die Blessur den 26 -Jährigen daran , an dem Training der Löwen teilzunehmen .	OVS	VSO	Blessur	hinderte	-Jährigen	Blessur	hinderte	-Jährigen	wrong prediction
+deu	Sein internationales Netzwerk , sein ausgeprägter Unternehmergeist und sein leidenschaftliches Engagement haben unseren Verein in besonderer Weise geformt .	SVO	SOV	Netzwerk	geformt	Verein	Netzwerk	geformt	Verein	wrong prediction
+deu	Nach der Rückfahrt nach Jekaterinburg und einem Abschiedsabendessen begeben wir uns zu dem Bahnhof .	OVS	VSO	wir	begeben	uns	wir	begeben	uns	wrong prediction
+deu	Es könnte also sein , dass man deutlich länger auf den Router warten muss , als das normalerweise der Fall wäre .	SV_only	INCOMPLETE		sein			sein		wrong prediction
+deu	Ein strategisches Dossier über ihn habe man nicht in der Schublade , heißt es aus Parteikreisen .	OVS	INCOMPLETE		heißt			heißt		wrong prediction
+deu	Rund um das Mehrfamilienhaus liegen nun viele Glasscherben , Autos wurden von umherfliegenden Teilen beschädigt .	OVS	SV_only	Glasscherben	liegen		Glasscherben	liegen		wrong prediction
+rus	Самое сложное – уметь конструктивно изложить неприятные вещи , потому что в каждом хочется видеть хорошее .	SV_only	INCOMPLETE							Incorrect, but if we consider that our model looks only for root verb in main clause then INCOMPLETE is correct annotation.
+rus	Новосибирские власти помогут семьям погибших на Украине военных - РИА Новости , 09.03 .	SVO	SV_only	власти	помогут		власти	помогут		Incorrect, семьям погибших - object
+rus	"Итогом такой целенаправленной работы должен стать документ , который будет способствовать выстраиванию эффективного взаимодействия между государственными органами , гражданами и субъектами хозяйствования "" , - дополнила Наталья Тарасенко ."	SV_only	INCOMPLETE							Incorrect, hard multi clause sentence
+rus	Кроме того , полезно включить легкую физическую активность перед сном , советует Утяшева .	SV_only	INCOMPLETE							Incorrect, probably model could find main clause with subject which is in the end
+rus	Отметим , что Усик является обладателем трех поясов в сверхтяжелом весе — WBA , WBO и IBF .	SV_only	INCOMPLETE		Отметим			Отметим		Incorrect, because model treated 1st clause as main where was no subject
+rus	Док сначала , потом сама постройка корпуса , потом доводка , потому что все заработает не сразу , потом испытания » , - написал Andrey Popov .	SV_only	INCOMPLETE							Incorrect, probably model could find main clause with subject which is in the end
